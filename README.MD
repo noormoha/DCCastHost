@@ -1,108 +1,180 @@
 FORMAT: 1A
 
-# Parameters API
-In this installment of the API Blueprint course we will discuss how to describe URI parameters.
+# DCCast Host
 
-But first let's add more messages to our system. For that we would need
-introduce an message identifier – id. This id will be our parameter when
-communicating with our API about messages.
+## Send [/send]
 
-## API Blueprint
-+ [Previous: Requests](06.%20Requests.md)
-+ [This: Raw API Blueprint](https://raw.github.com/apiaryio/api-blueprint/master/examples/07.%20Parameters.md)
-+ [Next: Attributes](08.%20Attributes.md)
+### Start a Sending [POST /send/{transferId}{?dst,port,volume,rate}]
 
-# Group Messages
-Group of all messages-related resources.
-
-## My Message [/message/{id}]
-Here we have added the message `id` parameter as an 
-[URI Template variable](http://tools.ietf.org/html/rfc6570) in the Message
-resource's URI. Note the parameter name `id` is enclosed in curly brackets. We
-will discuss this parameter in the `Parameters` section below, where we will
-also set its example value to `1` and declare it of an arbitrary 'number' type.
+A send request will start a NORM sender and send data from its own IP address and port number **port** to IP address **dst** and port number **port**.
 
 + Parameters
 
-    + id: 1 (number) - An unique identifier of the message.
-
-### Retrieve a Message [GET]
-
-+ Request Plain Text Message
-
-    + Headers
-
-            Accept: text/plain
-
-+ Response 200 (text/plain)
-
-    + Headers
-
-            X-My-Message-Header: 42
-
-    + Body
-
-            Hello World!
-
-+ Request JSON Message
-
-    + Headers
-
-            Accept: application/json
+    + transferId: `0` (number) - An unique integer identifier of transfer seesion with a range [0, 5000].
+    + dst: `127.0.0.1` (string) - The desination IP address as a string.
+    + port: `1000` (number) - An integer with a range [1000, 9999]. The port number that will be used as both source port and destination port.
+    + volume: `1024` (number) - An integer with a range [1, 2^64] that indicate how many bytes the sender should send to destination.
+    + rate: `500` (number) - An integer with a range[1, 2^32] that indicate how many bytes the sender should send in 1 second.
 
 + Response 200 (application/json)
+    
+    + Attribute (object)
+        + error (string, nullable) - Must be null.
+        
+    + Body
+    
+            {"error": null}
 
-    + Headers
++ Response 400 (application/json)
 
-            X-My-Message-Header: 42
+    + Attribute (object)
+        + error (string) - Reason of the error.
 
     + Body
+    
+            {"error": "Reason of the error"}
+        
+## Receive [/receive]
 
-            {
-              "id": 1,
-              "message": "Hello World!"
-            }
+### Start a Receiving [POST /receive/{transferId}{?src,port}]
 
-### Update a Message [PUT]
-
-+ Request Update Plain Text Message (text/plain)
-
-        All your base are belong to us.
-
-+ Request Update JSON Message (application/json)
-
-        { "message": "All your base are belong to us." }
-
-+ Response 204
-
-## All My Messages [/messages{?limit}]
-A resource representing all of my messages in the system.
-
-We have added the query URI template parameter - `limit`. This parameter is
-used for limiting the number of results returned by some actions on this
-resource. It does not affect every possible action of this resource, therefore
-we will discuss it only at the particular action level below.
-
-### Retrieve all Messages [GET]
+A receive request will start a NORM receiver and wait for data from the IP address **src** and port number **port**.
 
 + Parameters
 
-    + limit (number, optional) - The maximum number of results to return.
-        + Default: `20`
+    + transferId: `0` (number) - An unique integer identifier of transfer seesion with a range [0, 5000].
+    + src: `127.0.0.1` (string) - The IP address of sender.
+    + port: `1000` (number) - An integer with a range [1000, 9999]. The port number that will be used as both source port and destination port.
+
++ Response 200 (application/json)
+    
+    + Attribute (object)
+        + error (string, nullable) - Must be null.
+        
+    + Body
+    
+            {"error": null}
+
++ Response 400 (application/json)
+
+    + Attribute (object)
+        + error (string) - Reason of the error.
+
+    + Body
+    
+            {"error": "Reason of the error"}
+        
+## Update Rate [/updaterate]
+
+### Update the Rate of a Sender [POST /updaterate/{transferId}{?rate}]
+
+An update rate request will update rate limit of the sender with id **transferId**.
+
++ Parameters 
+
+    + transferId: `0` (number) - An unique integer identifier of transfer seesion with a range [0, 5000].
+    + rate: `500` (number) - An integer with a range[1, 2^32] that indicate how many bytes the sender should send in 1 second.
+
++ Response 200 (application/json)
+    
+    + Attribute (object)
+        + error (string, nullable) - Must be null.
+        
+    + Body
+    
+            {"error": null}
+
++ Response 400 (application/json)
+
+    + Attribute (object)
+        + error (string) - Reason of the error.
+
+    + Body
+    
+            {"error": "Reason of the error"}
+        
+## Progress [/progress]
+
+### Check Progress [GET /progress/{transferId}]
+
+Return how many bytes a sender/receiver has proccessed.
+
++ Parameters
+
+    + transferId: `0` (number) - An unique integer identifier of transfer seesion with a range [0, 5000].
 
 + Response 200 (application/json)
 
-        [
-          {
-            "id": 1,
-            "message": "Hello World!"
-          },
-          {
-            "id": 2,
-            "message": "Time is an illusion. Lunchtime doubly so."
-          },
-          {
-            "id": 3,
-            "message": "So long, and thanks for all the fish."
-          }
-        ]
+    + Attributes (object)
+        + error (string, nullable) - Must be null.
+        + type (string) - Either a "receiver" or a "sender". 
+        + progress (number) - Bytes that have been sent/received.
+    
+    + Body
+    
+            {"error": null, "type": "sender", "progress": 3424}
+            {"error": null, "type": "receiver", "progress": 5372834}
+
++ Response 400 (application/json)
+
+    + Attributes (object)
+        + error (string, nullable) - Reason of the error.
+    
+    + Body
+    
+            {"error": "Reason of the error"}
+        
+## Terminate [/terminate]
+
+### Forece a Termination [POST /terminate/{transferId}]
+
+Force a sender/receiver to stop.
+
++ Parameters
+
+     + transferId: `0` (number) - An unique integer identifier of transfer seesion with a range [0, 5000].
+
++ Response 200 (application/json)
+    
+    + Attribute (object)
+        + error (string, nullable) - Must be null.
+        
+    + Body
+    
+            {"error": null}
+
++ Response 400 (application/json)
+
+    + Attribute (object)
+        + error (string) - Reason of the error.
+
+    + Body
+    
+            {"error": "Reason of the error"}
+            
+## Clean [/cleanall]
+
+### Clean Any Transmission [POST /cleanall]
+
+Force all senders/receivers to stop.
+
++ Response 200 (application/json)
+    
+    + Attribute (object)
+        + error (string, nullable) - Must be null.
+        
+    + Body
+    
+            {"error": null}
+
++ Response 400 (application/json)
+
+    + Attribute (object)
+        + error (string) - Reason of the error.
+
+    + Body
+    
+            {"error": "Reason of the error"}
+
+
+        
