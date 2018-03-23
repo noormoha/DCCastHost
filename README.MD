@@ -176,5 +176,29 @@ Force all senders/receivers to stop.
     
             {"error": "Reason of the error"}
 
+## Active Transfers [/activetransfers]
 
+### Get the List of Active Transferer [GET /activetransfers]
+
+Get the list of all senders/receivers in the host.
+
++ Response 200 (application/json)
+    
+    + Attribute (object)
+        + error (string, nullable) - Must be null.
+        + senders (array) - A list of sender's transfer ID.
+        + receivers (array) - A list of receiver's transfer ID.
         
+    + Body
+    
+            {"error": null, "senders": [0, 10, 200], "receivers": [2, 3, 126, 256, 345]}
+
++ Response 400 (application/json)
+
+    + Attribute (object)
+        + error (string) - Reason of the error.
+
+    + Body
+    
+            {"error": "Reason of the error"}
+
