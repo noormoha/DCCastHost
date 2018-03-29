@@ -6,7 +6,7 @@ DCCast Host is a RESTFul API program that manage [NORM](https://www.nrl.navy.mil
 
 Defination of API can be found [here](https://alston-tang.github.io/DCCastHost/).
 
-## Compilation
+## Compilation and Running
 
 DCCast Host relies on [Pistache](http://pistache.io/), which is a C++ REST HTTP server framework and [NRL NORM Implementation](https://downloads.pf.itd.nrl.navy.mil/norm/), which implment and abstract NORM protocol. To compile DCCast Host, you need to compile and install above pre-requisite first.
 
@@ -16,8 +16,8 @@ mkdir build
 cd build
 cmake ..
 make
-./DCCastHost
 ```
+Once you compile DCCast Host, you can find a executable file DCCastHost in your build directory. Execute this file will create a HTTP server listen at port 9080.
 
 ## Porgress
 
