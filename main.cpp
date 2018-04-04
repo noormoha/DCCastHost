@@ -4,15 +4,10 @@
 
 #include <pistache/endpoint.h>
 #include <pistache/router.h>
-#include <memory>
 
 #include "REST/API.h"
 
 using namespace Pistache;
-
-void hello(const Rest::Request& req, Http::ResponseWriter res) {
-    res.send(Http::Code::Ok, "Hello");
-}
 
 int main() {
     Address address = Address("*:9080");
@@ -31,6 +26,6 @@ int main() {
     Rest::Routes::Post(router, "/send/:id", Rest::Routes::bind(DCCastAPI::send));
 
     server.setHandler(router.handler());
-
+    std::cout << "Server start" << std::endl;
     server.serve();
 }
