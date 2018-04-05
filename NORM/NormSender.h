@@ -15,6 +15,11 @@ class NormSender {
     // Receiver Thread
     pthread_t sender;
 
+    // Statics
+    uint64_t progress;
+    dc_status status;
+    unsigned int id;
+
 public:
 
     NormSender(unsigned int id, std::string dst, unsigned short port, uint32_t rate, const char *data, unsigned int data_len);
@@ -25,13 +30,15 @@ public:
     static const int NORM_NUM_DATA = 64;
     static const int NORM_NUM_PARITY = 16;
 
-    // Statics
-    uint64_t progress;
-    dc_status status;
-
     // Control Queues
     moodycamel::BlockingReaderWriterQueue<DCCommand> *requests;
     moodycamel::BlockingReaderWriterQueue<DCResponse> *responses;
+
+    // Get Methods
+    uint64_t get_progress();
+    dc_status get_status();
+    unsigned int get_id();
+
 };
 
 }

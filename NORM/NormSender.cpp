@@ -37,8 +37,9 @@ void* sender_loop(void *args) {
         *args_struct->status = ERROR;
         pthread_exit(nullptr);
     }
-
-    NormSessionHandle session = NormCreateSession(instance, args_struct->dst.c_str(), args_struct->port, 2);
+    // The sender has session ID 0
+    // TODO THE CORRECT METHOD?
+    NormSessionHandle session = NormCreateSession(instance, args_struct->dst.c_str(), args_struct->port, 0);
     if (session == NORM_SESSION_INVALID) {
         log_error(args_struct->id, "NormCreateSession(): Failed");
         *args_struct->status = ERROR;
@@ -86,7 +87,7 @@ void* sender_loop(void *args) {
             break;
         }
         obj_count++;
-        std::cout << "DataEnqueue: " << obj_count;
+        std::cout << "DataEnqueue: " << obj_count << std::endl;
     }
     // Loop begin
     bool running = true;
@@ -104,7 +105,7 @@ void* sender_loop(void *args) {
 
             // Process by type
             if (command.type == UPDATE_RATE) {
-                NormSetTxRate(session, command.content.updateRate.rate);
+                NormSetTxRate(session, command.content. updateRate.rate);
 
                 response.type = UPDATE_RATE;
                 response.id = args_struct->id;
@@ -160,7 +161,7 @@ void* sender_loop(void *args) {
                 break;
             }
             obj_count++;
-            std::cout << "DataEnqueue: " << obj_count;
+            std::cout << "DataEnqueue: " << obj_count << std::endl;
         }
         // End of the loop
     }
@@ -169,7 +170,9 @@ void* sender_loop(void *args) {
 
 
 
-DCCast::NormSender::NormSender(unsigned int id, std::string dst, unsigned short port, uint32_t rate, const char *data, unsigned int data_len) {
+DCCast::NormSender::NormSender(unsigned int _id, std::string dst, unsigned short port, uint32_t rate, const char *data, unsigned int data_len) {
+    id = _id;
+
     requests = new BlockingReaderWriterQueue<DCCommand>(10);
     responses = new BlockingReaderWriterQueue<DCResponse>(10);
 
@@ -196,6 +199,18 @@ DCCast::NormSender::NormSender(unsigned int id, std::string dst, unsigned short 
         status = ERROR;
         return;
     }
+}
+
+uint64_t NormSender::get_progress() {
+    return this->progress;
+}
+
+dc_status NormSender::get_status() {
+    return this->status;
+}
+
+unsigned int NormSender::get_id() {
+    return this->id;
 }
 
 }

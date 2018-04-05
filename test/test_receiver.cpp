@@ -10,10 +10,10 @@
 using namespace DCCast;
 
 int main() {
-    NormReceiver receiver(0, "0.0.0.0", 19242);
+    NormReceiver receiver(0, 19242);
     int count = 0;
     while (count < 20) {
-        std::cout << receiver.progress << std::endl;
+        std::cout << receiver.get_progress() << std::endl;
         sleep(1);
         count++;
     }
@@ -32,5 +32,5 @@ int main() {
 
     sleep(5);
 
-    std::cout << receiver.status << std::endl;
+    std::cout << receiver.get_status() << std::endl;
 }

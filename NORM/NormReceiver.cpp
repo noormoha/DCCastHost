@@ -31,7 +31,8 @@ void* receiver_loop(void *args) {
         *args_struct->status = ERROR;
         pthread_exit(nullptr);
     }
-    // TODO Each participant in a NORM session should have a unique ID => coordinator
+    // All receivers have session ID 1
+    // TODO IS THIS THE CORRECT METHOD?
     NormSessionHandle session = NormCreateSession(instance, "0.0.0.0", args_struct->port, 1);
     if (session == NORM_SESSION_INVALID) {
         log_error(args_struct->id, "NormCreateSession(): Failed");
@@ -136,7 +137,9 @@ void* receiver_loop(void *args) {
     *args_struct->status = TERMINATED;
 }
 
-DCCast::NormReceiver::NormReceiver(unsigned int id, std::string src, unsigned short port) {
+DCCast::NormReceiver::NormReceiver(unsigned int _id, unsigned short port) {
+    id = _id;
+
     requests = new BlockingReaderWriterQueue<DCCommand>(10);
     responses = new BlockingReaderWriterQueue<DCResponse>(10);
 
@@ -147,7 +150,6 @@ DCCast::NormReceiver::NormReceiver(unsigned int id, std::string src, unsigned sh
     args->responses = responses;
     args->requests = requests;
     args->port = port;
-    args->src = src;
 
     if (pthread_create(&receiver, nullptr, receiver_loop, args) != 0) {
         log_error(id, "pthread_create(): Failed");
@@ -161,4 +163,17 @@ DCCast::NormReceiver::NormReceiver(unsigned int id, std::string src, unsigned sh
         return;
     }
 }
+
+uint64_t NormReceiver::get_progress() {
+    return this->progress;
+}
+
+dc_status NormReceiver::get_status() {
+    return this->status;
+}
+
+unsigned int NormReceiver::get_id() {
+    return this->id;
+}
+
 }

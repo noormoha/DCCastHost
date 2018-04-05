@@ -14,6 +14,7 @@ add_library(NormSender NORM/NormSender.h NORM/NormSender.cpp)
 target_link_libraries(NormSender NormDefinition norm pthread)
 
 add_library(NormInstance NORM/NormInstance.h NORM/NormInstance.cpp)
+target_link_libraries(NormInstance NormSender NormReceiver)
 
 
 add_executable(DCCastHost
@@ -26,8 +27,17 @@ add_executable(DCCastHost
 
 target_link_libraries(DCCastHost pistache pthread)
 
+# TEST EXECUTABLES
+
 add_executable(test_receiver test/test_receiver.cpp)
 target_link_libraries(test_receiver NormReceiver)
 
 add_executable(test_sender test/test_sender.cpp)
 target_link_libraries(test_sender NormSender)
+
+add_executable(test_sender_instance test/test_norm_instance_sender.cpp)
+target_link_libraries(test_sender_instance NormInstance)
+
+add_executable(test_receiver_instance test/test_norm_instance_receiver.cpp)
+target_link_libraries(test_receiver_instance NormInstance)
+

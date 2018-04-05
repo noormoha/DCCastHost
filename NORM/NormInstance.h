@@ -19,18 +19,28 @@ typedef enum DC_INSTANCE_TYPE {
 } dc_instance_type;
 
 union InstanceConcrete {
-    NormSender *sender;
-    NormReceiver *receiver;
+    struct {
+        NormSender *sender;
+        const char* data;
+        unsigned int data_len;
+    } sender;
+    struct {
+        NormReceiver *receiver;
+    } receiver;
 };
 
 class NormInstance {
+
+public:
+    static const int NORM_SENDER_DATA_OBJECT_LEN = 10 * 1024;
+
     pthread_mutex_t mutex;
     dc_instance_type type;
     InstanceConcrete concrete;
 
     NormInstance();
-
-    void init_receiver(unsigned int transferId, std::string src, unsigned short port);
+    bool recycle();
+    void init_receiver(unsigned int transferId, unsigned short port);
     void init_sender(unsigned int transferId, std::string dst, unsigned short port, uint32_t rate);
 };
 
