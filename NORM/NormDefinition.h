@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <iostream>
 
+
 namespace DCCast {
 
     typedef enum DC_STATUS {
@@ -80,6 +81,13 @@ static std::string type_name_map[] = {
         "NORM_ACKING_NODE_NEW",
         "NORM_SEND_ERROR",
         "NORM_USER_TIMEOUT"
+};
+
+class DCException : std::runtime_error {
+    std::string error;
+public:
+    const char* what() const noexcept override;
+    explicit DCException(std::string error);
 };
 }
 

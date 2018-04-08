@@ -6,6 +6,7 @@
 #define DCCASTHOST_NORMINSTANCE_H
 
 #include <zconf.h>
+#include <mutex>
 #include "NormDefinition.h"
 #include "NormSender.h"
 #include "NormReceiver.h"
@@ -17,6 +18,8 @@ typedef enum DC_INSTANCE_TYPE {
     RECEIVER,
     NONE
 } dc_instance_type;
+
+
 
 union InstanceConcrete {
     struct {
@@ -31,17 +34,25 @@ union InstanceConcrete {
 
 class NormInstance {
 
+    void update_receiver_rate(uint32_t rate);
+    void update_sender_rate(uint32_t rate);
+    uint64_t get_receiver_progress();
+    uint64_t get_sender_progress();
+
 public:
     static const int NORM_SENDER_DATA_OBJECT_LEN = 10 * 1024;
 
-    pthread_mutex_t mutex;
+    std::mutex lock;
     dc_instance_type type;
     InstanceConcrete concrete;
 
     NormInstance();
-    bool recycle();
+    void recycle();
     void init_receiver(unsigned int transferId, unsigned short port);
     void init_sender(unsigned int transferId, std::string dst, unsigned short port, uint32_t rate);
+
+    void update_rate(uint32_t rate);
+    uint64_t get_progress();
 };
 
 }

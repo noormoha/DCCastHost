@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.9)
 
 project(DCCastHost)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 
 add_library(NormDefinition NORM/NormDefinition.h NORM/NormDefinition.cpp)
 
@@ -15,6 +15,9 @@ target_link_libraries(NormSender NormDefinition norm pthread)
 
 add_library(NormInstance NORM/NormInstance.h NORM/NormInstance.cpp)
 target_link_libraries(NormInstance NormSender NormReceiver)
+
+add_library(NormManager NORM/NormManager.h NORM/NormManager.cpp)
+target_link_libraries(NormManager NormInstance)
 
 
 add_executable(DCCastHost
@@ -40,4 +43,10 @@ target_link_libraries(test_sender_instance NormInstance)
 
 add_executable(test_receiver_instance test/test_norm_instance_receiver.cpp)
 target_link_libraries(test_receiver_instance NormInstance)
+
+add_executable(test_manager_receive test/test_manager_receive.cpp)
+target_link_libraries(test_manager_receive NormManager)
+
+add_executable(test_manager_send test/test_manager_send.cpp)
+target_link_libraries(test_manager_send NormManager)
 
