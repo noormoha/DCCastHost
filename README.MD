@@ -21,4 +21,4 @@ Once you compile DCCast Host, you can find a executable file DCCastHost in your 
 
 ## Porgress
 
-Currently there is only a dumb HTTP server that ehco any valid request. I will firstly implement /receive and /send.
+All APIs listed on the definiation page except cleanAll have been implemented. The implementation has not been thoroughly tested and may contain serious bugs.
