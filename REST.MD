@@ -42,7 +42,7 @@ A receive request will start a NORM receiver and wait for data from the IP addre
 + Parameters
 
     + transferId: `0` (number) - An unique integer identifier of transfer seesion with a range [0, 5000].
-    + src: `127.0.0.1` (string, optinal) - The IP address of sender. Currently this parameter will be ignored and "0.0.0.0" will be used instead.
+    + src: `127.0.0.1` (optional, string) - The IP address of sender. Currently this parameter will be ignored and "0.0.0.0" will be used instead.
     + port: `1000` (number) - An integer with a range [1000, 9999]. The port number that will be used as both source port and destination port.
 
 + Response 200 (application/json)
