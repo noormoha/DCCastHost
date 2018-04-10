@@ -168,6 +168,63 @@ uint64_t NormInstance::get_sender_progress() {
     return concrete.sender.sender->get_progress();
 }
 
+void NormInstance::terminate() {
+    switch (type) {
+        case NONE:
+            break;
+        case RECEIVER:
+            return terminate_receiver();
+        case SENDER:
+            return terminate_sender();
+    }
+}
+
+void NormInstance::terminate_receiver() {
+    NormReceiver *receiver = concrete.receiver.receiver;
+
+    DCCommand command = {};
+    command.type = TERMINATE;
+    command.id = receiver->get_id();
+
+    receiver->requests->enqueue(command);
+
+    DCResponse response = {};
+    if (!receiver->responses->wait_dequeue_timed(response, std::chrono::seconds(1))) {
+        throw DCException("Timeout when waiting for response");
+    }
+
+    if (response.id != receiver->get_id() || response.type != TERMINATE) {
+        throw std::runtime_error("Inconsistent type/id");
+    }
+
+    if (!response.success) {
+        throw DCException("Command failed");
+    }
+}
+
+void NormInstance::terminate_sender() {
+    NormSender *sender = concrete.sender.sender;
+
+    DCCommand command = {};
+    command.type = TERMINATE;
+    command.id = sender->get_id();
+
+    sender->requests->enqueue(command);
+
+    DCResponse response = {};
+    if (!sender->responses->wait_dequeue_timed(response, std::chrono::seconds(1))) {
+        throw DCException("Timeout when waiting for response");
+    }
+
+    if (response.id != sender->get_id() || response.type != TERMINATE) {
+        throw std::runtime_error("Inconsistent type/id");
+    }
+
+    if (!response.success) {
+        throw DCException("Command failed");
+    }
+}
+
 }
 
 

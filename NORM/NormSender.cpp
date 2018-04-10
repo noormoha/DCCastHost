@@ -13,18 +13,11 @@ using namespace moodycamel;
 
 namespace DCCast {
 
-struct sender_loop_args {
-    BlockingReaderWriterQueue<DCCommand> *requests;
-    BlockingReaderWriterQueue<DCResponse> *responses;
-    uint64_t *progress;
-    dc_status *status;
-    unsigned int id;
-    std::string dst;
-    unsigned short port;
-    uint32_t rate;
-    const char *data;
-    unsigned int data_len;
-};
+static void clean(NormSessionHandle session, NormInstanceHandle instance) {
+    NormStopSender(session);
+    NormDestroySession(session);
+    NormDestroyInstance(instance);
+}
 
 void* sender_loop(void *args) {
     auto *args_struct = static_cast<sender_loop_args*>(args);
@@ -35,6 +28,8 @@ void* sender_loop(void *args) {
     if (instance == NORM_INSTANCE_INVALID) {
         log_error(args_struct->id, "NormCreateInstance(): Failed");
         *args_struct->status = ERROR;
+
+        clean(nullptr, instance);
         pthread_exit(nullptr);
     }
     // The sender has session ID 0
@@ -43,6 +38,8 @@ void* sender_loop(void *args) {
     if (session == NORM_SESSION_INVALID) {
         log_error(args_struct->id, "NormCreateSession(): Failed");
         *args_struct->status = ERROR;
+
+        clean(session, instance);
         pthread_exit(nullptr);
     }
 
@@ -51,12 +48,16 @@ void* sender_loop(void *args) {
     if (!NormSetTxPort(session, args_struct->port)) {
         log_error(args_struct->id, "NormSetTxPort(): Failed");
         *args_struct->status = ERROR;
+
+        clean(session, instance);
         pthread_exit(nullptr);
     }
 
     if (!NormStartSender(session, 0, NormSender::NORM_SENDER_BUFFER, NormSender::NORM_SEGMENT_SIZE, NormSender::NORM_NUM_DATA, NormSender::NORM_NUM_PARITY)) {
         log_error(args_struct->id, "NormStartSender(): Failed");
         *args_struct->status = ERROR;
+
+        clean(session, instance);
         pthread_exit(nullptr);
     }
 
@@ -64,6 +65,8 @@ void* sender_loop(void *args) {
     if (epoll_fd < 0) {
         log_error(args_struct->id, "epoll_create(): Failed");
         *args_struct->status = ERROR;
+
+        clean(session, instance);
         pthread_exit(nullptr);
     }
 
@@ -71,6 +74,8 @@ void* sender_loop(void *args) {
     if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, NormGetDescriptor(instance), &ep) != 0) {
         log_error(args_struct->id, "epoll_ctl(): Failed");
         *args_struct->status = ERROR;
+
+        clean(session, instance);
         pthread_exit(nullptr);
     }
 
@@ -138,6 +143,8 @@ void* sender_loop(void *args) {
         if (rv < 0) {
             log_error(args_struct->id, "epoll_wait(): Failed");
             *args_struct->status = ERROR;
+
+            clean(session, instance);
             pthread_exit(nullptr);
         }
         if (rv > 0) {
@@ -166,6 +173,9 @@ void* sender_loop(void *args) {
         // End of the loop
     }
     *args_struct->status = TERMINATED;
+
+    clean(session, instance);
+
 }
 
 
@@ -173,10 +183,11 @@ void* sender_loop(void *args) {
 DCCast::NormSender::NormSender(unsigned int _id, std::string dst, unsigned short port, uint32_t rate, const char *data, unsigned int data_len) {
     id = _id;
 
+    // requests and response will be deleted when sender_loop_args is deleted
     requests = new BlockingReaderWriterQueue<DCCommand>(10);
     responses = new BlockingReaderWriterQueue<DCResponse>(10);
 
-    auto *args = new sender_loop_args;
+    args = new sender_loop_args;
     args->data_len = data_len;
     args->data = data;
     args->status = &status;
@@ -189,15 +200,14 @@ DCCast::NormSender::NormSender(unsigned int _id, std::string dst, unsigned short
     args->dst = dst;
 
     if (pthread_create(&sender, nullptr, sender_loop, args) != 0) {
-        log_error(id, "pthread_create(): Failed");
-        status = ERROR;
-        return;
+        // Safe to set status here since thread is not running
+        this->status = ERROR;
+        throw DCException("pthread_create(): Failed");
     }
 
     if (pthread_detach(sender) != 0) {
-        log_error(id, "pthread_detach(): Failed");
-        status = ERROR;
-        return;
+        // Fatal error that will crash the system
+        throw std::runtime_error("pthread_detach(): Failed");
     }
 }
 
@@ -211,6 +221,12 @@ dc_status NormSender::get_status() {
 
 unsigned int NormSender::get_id() {
     return this->id;
+}
+
+NormSender::~NormSender() {
+    delete args;
+    delete responses;
+    delete requests;
 }
 
 }

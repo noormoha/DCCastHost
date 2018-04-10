@@ -10,9 +10,22 @@
 
 namespace DCCast {
 
+struct receiver_loop_args {
+    dc_status *status;
+    uint64_t *progress;
+    unsigned int id;
+    moodycamel::BlockingReaderWriterQueue<DCCommand> *requests;
+    moodycamel::BlockingReaderWriterQueue<DCResponse> *responses;
+    unsigned short port;
+    std::string src;
+};
+
 class NormReceiver {
     // Receiver Thread
     pthread_t receiver;
+
+    // Thread input structure
+    receiver_loop_args *args;
 
     // Statics
     uint64_t progress;
@@ -22,6 +35,7 @@ class NormReceiver {
 public:
 
     NormReceiver(unsigned int id, unsigned short port);
+    ~NormReceiver();
 
     // Configs
     static const int NORM_RECEIVER_BUFFER = 5 * 1024 * 1024;

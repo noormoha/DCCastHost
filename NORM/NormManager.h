@@ -22,6 +22,7 @@ public:
     void receive(unsigned int id, unsigned short port);
     void update_rate(unsigned int id, uint32_t rate);
     uint64_t get_progress(unsigned int id);
+    void terminate(unsigned int id);
 
     //These functions are deleted to prevent copy instance
     NormManager(NormManager &) = delete;

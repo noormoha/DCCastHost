@@ -72,13 +72,25 @@ NormInstance *NormManager::get_create_norm_instance(unsigned int id) {
     std::unique_lock<std::shared_timed_mutex> guard(lock);
     if (!instances.count(id)) {
         // Create a instance if not exists
-        auto *new_instacne = new NormInstance();
-        instances[id] = new_instacne;
+        auto *new_instance = new NormInstance();
+        instances[id] = new_instance;
     }
     rv = instances[id];
     guard.unlock();
 
     return rv;
+}
+
+void NormManager::terminate(unsigned int id) {
+    // Get instance first
+    NormInstance *cur_instance = get_norm_instance(id);
+
+    if (!cur_instance) {
+        throw DCException("Can not find provided transfer id");
+    }
+
+    std::unique_lock<std::mutex> instance_guard(cur_instance->lock);
+    return cur_instance->terminate();
 }
 
 }

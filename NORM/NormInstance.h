@@ -34,10 +34,14 @@ union InstanceConcrete {
 
 class NormInstance {
 
+
+
     void update_receiver_rate(uint32_t rate);
     void update_sender_rate(uint32_t rate);
     uint64_t get_receiver_progress();
     uint64_t get_sender_progress();
+    void terminate_receiver();
+    void terminate_sender();
 
 public:
     static const int NORM_SENDER_DATA_OBJECT_LEN = 10 * 1024;
@@ -53,6 +57,7 @@ public:
 
     void update_rate(uint32_t rate);
     uint64_t get_progress();
+    void terminate();
 };
 
 }

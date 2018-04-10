@@ -10,10 +10,26 @@
 
 namespace DCCast {
 
+struct sender_loop_args {
+    moodycamel::BlockingReaderWriterQueue<DCCommand> *requests;
+    moodycamel::BlockingReaderWriterQueue<DCResponse> *responses;
+    uint64_t *progress;
+    dc_status *status;
+    unsigned int id;
+    std::string dst;
+    unsigned short port;
+    uint32_t rate;
+    const char *data;
+    unsigned int data_len;
+};
+
 
 class NormSender {
     // Receiver Thread
     pthread_t sender;
+
+    // Thread input structure
+    sender_loop_args *args;
 
     // Statics
     uint64_t progress;
@@ -23,6 +39,7 @@ class NormSender {
 public:
 
     NormSender(unsigned int id, std::string dst, unsigned short port, uint32_t rate, const char *data, unsigned int data_len);
+    ~NormSender();
 
     // Configs
     static const int NORM_SENDER_BUFFER = 20 * 1024 * 1024;

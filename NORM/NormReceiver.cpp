@@ -10,15 +10,11 @@ using namespace moodycamel;
 
 namespace DCCast {
 
-struct receiver_loop_args {
-    dc_status *status;
-    uint64_t *progress;
-    unsigned int id;
-    BlockingReaderWriterQueue<DCCommand> *requests;
-    BlockingReaderWriterQueue<DCResponse> *responses;
-    unsigned short port;
-    std::string src;
-};
+static void clean(NormSessionHandle session, NormInstanceHandle instance) {
+    NormStopReceiver(session);
+    NormDestroySession(session);
+    NormDestroyInstance(instance);
+}
 
 void* receiver_loop(void *args) {
     auto *args_struct = static_cast<receiver_loop_args*>(args);
@@ -29,6 +25,8 @@ void* receiver_loop(void *args) {
     if (instance == NORM_INSTANCE_INVALID) {
         log_error(args_struct->id, "NormCreateInstance(): Failed");
         *args_struct->status = ERROR;
+
+        clean(nullptr, instance);
         pthread_exit(nullptr);
     }
     // All receivers have session ID 1
@@ -37,6 +35,8 @@ void* receiver_loop(void *args) {
     if (session == NORM_SESSION_INVALID) {
         log_error(args_struct->id, "NormCreateSession(): Failed");
         *args_struct->status = ERROR;
+
+        clean(session, instance);
         pthread_exit(nullptr);
     }
 
@@ -45,6 +45,8 @@ void* receiver_loop(void *args) {
     if (!NormStartReceiver(session, NormReceiver::NORM_RECEIVER_BUFFER)) {
         log_error(args_struct->id, "NormStartReceiver(): Failed");
         *args_struct->status = ERROR;
+
+        clean(session, instance);
         pthread_exit(nullptr);
     }
 
@@ -52,6 +54,8 @@ void* receiver_loop(void *args) {
     if (epoll_fd < 0) {
         log_error(args_struct->id, "epoll_create(): Failed");
         *args_struct->status = ERROR;
+
+        clean(session, instance);
         pthread_exit(nullptr);
     }
 
@@ -59,10 +63,15 @@ void* receiver_loop(void *args) {
     if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, NormGetDescriptor(instance), &ep) != 0) {
         log_error(args_struct->id, "epoll_ctl(): Failed");
         *args_struct->status = ERROR;
+
+        clean(session, instance);
         pthread_exit(nullptr);
     }
 
     *args_struct->status = PROGRESSING;
+
+    // Total byte sent until last completely received object
+    uint64_t last_obj_sent = 0;
 
     // Loop begin
     bool running = true;
@@ -106,6 +115,8 @@ void* receiver_loop(void *args) {
         if (rv < 0) {
             log_error(args_struct->id, "epoll_wait(): Failed");
             *args_struct->status = ERROR;
+
+            clean(session, instance);
             pthread_exit(nullptr);
         }
         if (rv > 0) {
@@ -114,7 +125,25 @@ void* receiver_loop(void *args) {
             NormGetNextEvent(instance, &event);
             std::cout << type_name_map[event.type] << std::endl;
 
-            if (event.type == NORM_RX_OBJECT_COMPLETED) {
+            if (event.type == NORM_RX_OBJECT_UPDATED) {
+                NormObjectHandle obj = event.object;
+                if (obj == NORM_OBJECT_INVALID) {
+                    log_error(args_struct->id, "Receive empty object.");
+                    *args_struct->status = ERROR;
+                    pthread_exit(nullptr);
+                }
+
+                long long pending = NormObjectGetBytesPending(obj);
+                long long size = NormObjectGetSize(obj);
+                if (pending < 0 || size < 0) {
+                    log_error(args_struct->id, "Negative length object");
+                    *args_struct->status = ERROR;
+                    pthread_exit(nullptr);
+                }
+
+                *args_struct->progress = last_obj_sent + size - pending;
+            }
+            else if (event.type == NORM_RX_OBJECT_COMPLETED) {
                 NormObjectHandle obj = event.object;
                 if (obj == NORM_OBJECT_INVALID) {
                     log_error(args_struct->id, "Receive empty object. What's happening?");
@@ -129,12 +158,15 @@ void* receiver_loop(void *args) {
                     pthread_exit(nullptr);
                 }
 
-                *args_struct->progress += size;
+                last_obj_sent += size;
+                *args_struct->progress = last_obj_sent;
             }
         }
         //End of the loop
     }
     *args_struct->status = TERMINATED;
+
+    clean(session, instance);
 }
 
 DCCast::NormReceiver::NormReceiver(unsigned int _id, unsigned short port) {
@@ -143,7 +175,7 @@ DCCast::NormReceiver::NormReceiver(unsigned int _id, unsigned short port) {
     requests = new BlockingReaderWriterQueue<DCCommand>(10);
     responses = new BlockingReaderWriterQueue<DCResponse>(10);
 
-    auto *args = new receiver_loop_args;
+    args = new receiver_loop_args;
     args->status = &status;
     args->progress = &progress;
     args->id = id;
@@ -174,6 +206,12 @@ dc_status NormReceiver::get_status() {
 
 unsigned int NormReceiver::get_id() {
     return this->id;
+}
+
+NormReceiver::~NormReceiver() {
+    delete args;
+    delete responses;
+    delete requests;
 }
 
 }
