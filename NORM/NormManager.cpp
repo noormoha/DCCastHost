@@ -3,6 +3,7 @@
 //
 
 #include "NormManager.h"
+#include "NormInstance.h"
 
 namespace DCCast {
 
@@ -92,5 +93,35 @@ void NormManager::terminate(unsigned int id) {
     std::unique_lock<std::mutex> instance_guard(cur_instance->lock);
     return cur_instance->terminate();
 }
+
+void NormManager::active_transfers(std::vector<unsigned int> &senders, std::vector<unsigned int> &receivers) {
+    // Lock instances
+    std::shared_lock<std::shared_timed_mutex> guard(lock);
+
+    // Traverse all instances
+    for (auto &ins_pair : instances) {
+        NormInstance *ins = ins_pair.second;
+        switch (ins->type) {
+            case RECEIVER:
+                if (ins->concrete.receiver.receiver->get_status() == PROGRESSING) {
+                    receivers.push_back(ins->concrete.receiver.receiver->get_id());
+                }
+                break;
+            case SENDER:
+                if (ins->concrete.sender.sender->get_status() == PROGRESSING) {
+                    senders.push_back(ins->concrete.sender.sender->get_id());
+                }
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+std::string NormManager::get_type(unsigned int id) {
+    NormInstance *instance = get_norm_instance(id);
+    return dc_instance_type_str(instance->type);
+}
+
 
 }

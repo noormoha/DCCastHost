@@ -9,6 +9,6 @@ using namespace Pistache;
 
 void DCCastAPI::cleanAll(const Pistache::Rest::Request &req, Pistache::Http::ResponseWriter res) {
     json response;
-    response["err"] = nullptr;
+    response["error"] = nullptr;
     res.send(Http::Code::Ok, response.dump(), MIME(Application, Json));
 }

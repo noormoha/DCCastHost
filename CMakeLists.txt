@@ -28,7 +28,7 @@ add_executable(DCCastHost
         REST/activeTransfer.cpp
         REST/terminate.cpp REST/API.h REST/updateRate.cpp REST/receive.cpp REST/send.cpp)
 
-target_link_libraries(DCCastHost pistache pthread)
+target_link_libraries(DCCastHost pistache pthread NormManager)
 
 # TEST EXECUTABLES
 
@@ -49,4 +49,10 @@ target_link_libraries(test_manager_receive NormManager)
 
 add_executable(test_manager_send test/test_manager_send.cpp)
 target_link_libraries(test_manager_send NormManager)
+
+add_executable(test_active_receiver test/test_active_receiver.cpp)
+target_link_libraries(test_active_receiver NormManager)
+
+add_executable(test_active_sender test/test_active_sender.cpp)
+target_link_libraries(test_active_sender NormManager)
 

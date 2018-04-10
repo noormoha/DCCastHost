@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include <mutex>
 #include <shared_mutex>
+#include <vector>
 #include "NormInstance.h"
 
 namespace DCCast {
@@ -23,6 +24,9 @@ public:
     void update_rate(unsigned int id, uint32_t rate);
     uint64_t get_progress(unsigned int id);
     void terminate(unsigned int id);
+    void active_transfers(std::vector<unsigned int> &senders, std::vector<unsigned int> &receivers);
+
+    std::string get_type(unsigned int id);
 
     //These functions are deleted to prevent copy instance
     NormManager(NormManager &) = delete;

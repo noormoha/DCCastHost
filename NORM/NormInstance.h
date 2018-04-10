@@ -19,7 +19,16 @@ typedef enum DC_INSTANCE_TYPE {
     NONE
 } dc_instance_type;
 
-
+static std::string dc_instance_type_str(dc_instance_type type) {
+    switch (type) {
+        case SENDER:
+            return "sender";
+        case RECEIVER:
+            return "receiver";
+        case NONE:
+            return "none";
+    }
+}
 
 union InstanceConcrete {
     struct {
@@ -33,9 +42,6 @@ union InstanceConcrete {
 };
 
 class NormInstance {
-
-
-
     void update_receiver_rate(uint32_t rate);
     void update_sender_rate(uint32_t rate);
     uint64_t get_receiver_progress();
