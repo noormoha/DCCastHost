@@ -123,7 +123,10 @@ void* receiver_loop(void *args) {
             // There is at least one event
             NormEvent event = {};
             NormGetNextEvent(instance, &event);
+
+#ifdef DEBUG
             std::cout << type_name_map[event.type] << std::endl;
+#endif
 
             if (event.type == NORM_RX_OBJECT_UPDATED) {
                 NormObjectHandle obj = event.object;
@@ -171,6 +174,8 @@ void* receiver_loop(void *args) {
 
 DCCast::NormReceiver::NormReceiver(unsigned int _id, unsigned short port) {
     id = _id;
+    progress = 0;
+    status = TERMINATED;
 
     requests = new BlockingReaderWriterQueue<DCCommand>(10);
     responses = new BlockingReaderWriterQueue<DCResponse>(10);

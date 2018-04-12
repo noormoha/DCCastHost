@@ -92,7 +92,6 @@ void* sender_loop(void *args) {
             break;
         }
         obj_count++;
-        std::cout << "DataEnqueue: " << obj_count << std::endl;
     }
     // Loop begin
     bool running = true;
@@ -151,7 +150,10 @@ void* sender_loop(void *args) {
             // There is at least one event
             NormEvent event = {};
             NormGetNextEvent(instance, &event);
+
+#ifdef DEBUG
             std::cout << type_name_map[event.type] << std::endl;
+#endif
 
             if (event.type == NORM_TX_OBJECT_SENT) {
                 // Update obj_count and progress
@@ -168,7 +170,6 @@ void* sender_loop(void *args) {
                 break;
             }
             obj_count++;
-            std::cout << "DataEnqueue: " << obj_count << std::endl;
         }
         // End of the loop
     }
@@ -182,6 +183,8 @@ void* sender_loop(void *args) {
 
 DCCast::NormSender::NormSender(unsigned int _id, std::string dst, unsigned short port, uint32_t rate, const char *data, unsigned int data_len) {
     id = _id;
+    progress = 0;
+    status = TERMINATED;
 
     // requests and response will be deleted when sender_loop_args is deleted
     requests = new BlockingReaderWriterQueue<DCCommand>(10);
