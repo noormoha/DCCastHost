@@ -189,15 +189,12 @@ DCCast::NormReceiver::NormReceiver(unsigned int _id, unsigned short port) {
     args->port = port;
 
     if (pthread_create(&receiver, nullptr, receiver_loop, args) != 0) {
-        log_error(id, "pthread_create(): Failed");
         status = ERROR;
-        return;
+        throw DCException("pthread_create(): Failed");
     }
 
     if (pthread_detach(receiver) != 0) {
-        log_error(id, "pthread_detach(): Failed");
-        status = ERROR;
-        return;
+        throw std::runtime_error("pthread_detach(): Failed");
     }
 }
 
