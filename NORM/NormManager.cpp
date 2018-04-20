@@ -14,7 +14,7 @@ NormManager &NormManager::get_instance() {
 
 NormManager::NormManager() { }
 
-void NormManager::send(unsigned int id, std::string dst, unsigned short port, uint32_t rate) {
+void NormManager::send(unsigned int id, std::string dst, unsigned short port, double rate) {
     // Get instance first
     NormInstance *cur_instance = get_create_norm_instance(id);
 
@@ -32,7 +32,7 @@ void NormManager::receive(unsigned int id, unsigned short port) {
     instance_guard.unlock();
 }
 
-void NormManager::update_rate(unsigned int id, uint32_t rate) {
+void NormManager::update_rate(unsigned int id, double rate) {
     // Get instance first
     NormInstance *cur_instance = get_norm_instance(id);
 

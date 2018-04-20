@@ -19,9 +19,9 @@ class NormManager {
 public:
     static NormManager &get_instance();
 
-    void send(unsigned int id, std::string dst, unsigned short port, uint32_t rate);
+    void send(unsigned int id, std::string dst, unsigned short port, double rate);
     void receive(unsigned int id, unsigned short port);
-    void update_rate(unsigned int id, uint32_t rate);
+    void update_rate(unsigned int id, double rate);
     uint64_t get_progress(unsigned int id);
     void terminate(unsigned int id);
     void active_transfers(std::vector<unsigned int> &senders, std::vector<unsigned int> &receivers);

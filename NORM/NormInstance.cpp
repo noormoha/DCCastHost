@@ -24,7 +24,7 @@ void DCCast::NormInstance::init_receiver(unsigned int transferId, unsigned short
     this->concrete.receiver.receiver = new NormReceiver(transferId, port);
 }
 
-void DCCast::NormInstance::init_sender(unsigned int transferId, std::string dst, unsigned short port, uint32_t rate) {
+void DCCast::NormInstance::init_sender(unsigned int transferId, std::string dst, unsigned short port, double rate) {
     // Check whether instance is in use
     recycle();
 
@@ -79,7 +79,7 @@ void DCCast::NormInstance::recycle() {
     throw DCException("Unknown Error at NormInstance::recycle()");
 }
 
-void NormInstance::update_rate(uint32_t rate) {
+void NormInstance::update_rate(double rate) {
     switch (type) {
         case NONE:
             throw DCException("Try to set rate on a uninitialized instance");
@@ -90,7 +90,7 @@ void NormInstance::update_rate(uint32_t rate) {
     }
 }
 
-void NormInstance::update_receiver_rate(uint32_t rate) {
+void NormInstance::update_receiver_rate(double rate) {
     NormReceiver *receiver = concrete.receiver.receiver;
 
     if (receiver->get_status() != PROGRESSING) {
@@ -119,7 +119,7 @@ void NormInstance::update_receiver_rate(uint32_t rate) {
     // Success
 }
 
-void NormInstance::update_sender_rate(uint32_t rate) {
+void NormInstance::update_sender_rate(double rate) {
     NormSender *sender = concrete.sender.sender;
 
     if (sender->get_status() != PROGRESSING) {

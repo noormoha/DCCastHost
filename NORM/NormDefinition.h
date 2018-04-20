@@ -26,7 +26,7 @@ namespace DCCast {
 
     union DCCommandContent {
         struct {
-            uint32_t rate;
+            double rate;
         } updateRate;
     };
 

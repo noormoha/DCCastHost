@@ -16,7 +16,7 @@ void DCCastAPI::send(const Pistache::Rest::Request& req, Pistache::Http::Respons
 
     unsigned int id = 0;
     unsigned short port = 0;
-    uint32_t rate = 0;
+    double rate = 0;
     std::string address;
     try {
         id = req.param(":id").as<unsigned int>();
@@ -44,7 +44,7 @@ void DCCastAPI::send(const Pistache::Rest::Request& req, Pistache::Http::Respons
         response["error"] = "Port number should be in the range [1000, 9999].";
         goto error;
     }
-    rate = std::stoi(req.query().get("rate").get());
+    rate = std::stod(req.query().get("rate").get());
     if (rate <= 0) {
         response["error"] = "Rate should be larger than 0.";
         goto error;

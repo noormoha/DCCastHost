@@ -42,8 +42,8 @@ union InstanceConcrete {
 };
 
 class NormInstance {
-    void update_receiver_rate(uint32_t rate);
-    void update_sender_rate(uint32_t rate);
+    void update_receiver_rate(double rate);
+    void update_sender_rate(double rate);
     uint64_t get_receiver_progress();
     uint64_t get_sender_progress();
     void terminate_receiver();
@@ -59,9 +59,9 @@ public:
     NormInstance();
     void recycle();
     void init_receiver(unsigned int transferId, unsigned short port);
-    void init_sender(unsigned int transferId, std::string dst, unsigned short port, uint32_t rate);
+    void init_sender(unsigned int transferId, std::string dst, unsigned short port, double rate);
 
-    void update_rate(uint32_t rate);
+    void update_rate(double rate);
     uint64_t get_progress();
     void terminate();
 };

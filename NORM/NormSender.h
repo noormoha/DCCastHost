@@ -18,7 +18,7 @@ struct sender_loop_args {
     unsigned int id;
     std::string dst;
     unsigned short port;
-    uint32_t rate;
+    double rate;
     const char *data;
     unsigned int data_len;
 };
@@ -38,7 +38,7 @@ class NormSender {
 
 public:
 
-    NormSender(unsigned int id, std::string dst, unsigned short port, uint32_t rate, const char *data, unsigned int data_len);
+    NormSender(unsigned int id, std::string dst, unsigned short port, double rate, const char *data, unsigned int data_len);
     ~NormSender();
 
     // Configs
@@ -46,6 +46,7 @@ public:
     static const int NORM_SEGMENT_SIZE = 1300;
     static const int NORM_NUM_DATA = 64;
     static const int NORM_NUM_PARITY = 16;
+    static const int OBJECT_LENGTH = 10;
 
     // Control Queues
     moodycamel::BlockingReaderWriterQueue<DCCommand> *requests;

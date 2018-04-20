@@ -85,7 +85,7 @@ void* sender_loop(void *args) {
 
     int obj_count = 0;
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < NormSender::OBJECT_LENGTH; i++) {
         NormObjectHandle obj = NormDataEnqueue(session, args_struct->data, args_struct->data_len);
         if (obj == NORM_OBJECT_INVALID) {
             log_error(args_struct->id, "NormDataEnqueue: Failed");
@@ -163,7 +163,7 @@ void* sender_loop(void *args) {
         }
 
         // Enqueue data if needed
-        while (obj_count < 10) {
+        while (obj_count < NormSender::OBJECT_LENGTH) {
             NormObjectHandle obj = NormDataEnqueue(session, args_struct->data, args_struct->data_len);
             if (obj == NORM_OBJECT_INVALID) {
                 log_error(args_struct->id, "NormDataEnqueue: Failed");
@@ -181,7 +181,7 @@ void* sender_loop(void *args) {
 
 
 
-DCCast::NormSender::NormSender(unsigned int _id, std::string dst, unsigned short port, uint32_t rate, const char *data, unsigned int data_len) {
+DCCast::NormSender::NormSender(unsigned int _id, std::string dst, unsigned short port, double rate, const char *data, unsigned int data_len) {
     id = _id;
     progress = 0;
     status = TERMINATED;

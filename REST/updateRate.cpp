@@ -15,7 +15,7 @@ void DCCastAPI::updateRate(const Pistache::Rest::Request& req, Pistache::Http::R
     json response;
 
     unsigned int id = 0;
-    uint32_t rate = 0;
+    double rate = 0;
     try {
         id = req.param(":id").as<unsigned int>();
     }
@@ -28,7 +28,7 @@ void DCCastAPI::updateRate(const Pistache::Rest::Request& req, Pistache::Http::R
         response["error"] = "No rate provided.";
         goto error;
     }
-    rate = std::stoi(req.query().get("rate").get());
+    rate = std::stod(req.query().get("rate").get());
     if (rate <= 0) {
         response["error"] = "Rate should be a number larger than 0.";
         goto error;
