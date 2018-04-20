@@ -18,14 +18,14 @@ int main() {
     if (!clock_gettime(CLOCK_REALTIME, &start_time)) {
         std::cerr << "Can not get time" << std::endl;
     }
-    for (int i = 0; i < 120; i++) {
+    for (int i = 0; i < 60; i++) {
         std::cout << receiver.get_progress() << " bytes has been sent" << std::endl;
         sleep(1);
     }
-    if (!clock_gettime(CLOCK_REALTIME, &end_time)) {
+    if (clock_gettime(CLOCK_REALTIME, &end_time) != 0) {
         std::cerr << "Can not get time" << std::endl;
     }
     double diff = end_time.tv_sec - start_time.tv_sec +
             static_cast<double >(end_time.tv_nsec - start_time.tv_nsec) / 1000000000;
-    std::cout << "Receiving rate: " << receiver.get_progress() / diff;
+    std::cout << "Receiving rate: " << receiver.get_progress() / diff / 1000000 * 8;
 }

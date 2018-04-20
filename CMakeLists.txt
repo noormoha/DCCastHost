@@ -56,7 +56,7 @@ target_link_libraries(test_active_receiver NormManager)
 add_executable(test_active_sender test/test_active_sender.cpp)
 target_link_libraries(test_active_sender NormManager)
 
-set(mininet_rates 100000000 400000000 1000000000 2000000000)
+set(mininet_rates 400000000 1000000000 4000000000 10000000000)
 
 foreach(rate ${mininet_rates})
     add_executable(test_mininet_sender_${rate} test/test_mininet_sender.cpp)
