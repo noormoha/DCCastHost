@@ -45,8 +45,8 @@ public:
     static const int NORM_SENDER_BUFFER = 20 * 1024 * 1024;
     static const int NORM_SEGMENT_SIZE = 1300;
     static const int NORM_NUM_DATA = 64;
-    static const int NORM_NUM_PARITY = 16;
-    static const int OBJECT_LENGTH = 10;
+    static const int NORM_NUM_PARITY = 0;
+    static const int OBJECT_LENGTH = 5;
 
     // Control Queues
     moodycamel::BlockingReaderWriterQueue<DCCommand> *requests;
