@@ -46,6 +46,7 @@ void DCCastAPI::updateRate(const Pistache::Rest::Request& req, Pistache::Http::R
     }
 
     res.send(Http::Code::Ok, response.dump(), MIME(Application, Json));
+    std::cout << "UpdateRate" << std::endl;
     return;
 
     error:

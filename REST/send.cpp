@@ -66,6 +66,7 @@ void DCCastAPI::send(const Pistache::Rest::Request& req, Pistache::Http::Respons
     }
 
     res.send(Http::Code::Ok, response.dump(), MIME(Application, Json));
+    std::cout << "Send" << std::endl;
     return;
 
     error:

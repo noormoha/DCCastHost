@@ -31,6 +31,7 @@ void DCCastAPI::activeTransfer(const Pistache::Rest::Request& req, Pistache::Htt
     response["receivers"] = receivers;
 
     res.send(Http::Code::Ok, response.dump(), MIME(Application, Json));
+    std::cout << "ActiveTransfer" << std::endl;
     return;
 
     error:

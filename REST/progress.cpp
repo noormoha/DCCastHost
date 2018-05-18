@@ -35,6 +35,7 @@ void DCCastAPI::progress(const Pistache::Rest::Request& req, Pistache::Http::Res
     }
 
     res.send(Http::Code::Ok, response.dump(), MIME(Application, Json));
+    std::cout << "Progress" << std::endl;
     return;
 
     error:

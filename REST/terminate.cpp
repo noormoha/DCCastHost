@@ -35,6 +35,7 @@ void DCCastAPI::terminate(const Pistache::Rest::Request& req, Pistache::Http::Re
     }
 
     res.send(Http::Code::Ok, response.dump(), MIME(Application, Json));
+    std::cout << "Terminate" << std::endl;
     return;
 
     error:
