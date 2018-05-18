@@ -63,9 +63,9 @@ A receive request will start a NORM receiver and wait for data from the IP addre
     
             {"error": "Reason of the error"}
         
-## Update Rate [/updaterate]
+## Update Rate [/updateRate]
 
-### Update the Rate of a Sender [POST /updaterate/{transferId}{?rate}]
+### Update the Rate of a Sender [POST /updateRate/{transferId}{?rate}]
 
 An update rate request will update rate limit of the sender with id **transferId**.
 
@@ -175,9 +175,9 @@ Force all senders/receivers to stop.
     
             {"error": "Reason of the error"}
 
-## Active Transfers [/activetransfers]
+## Active Transfers [/activeTransfer]
 
-### Get the List of Active Transferer [GET /activetransfers]
+### Get the List of Active Transfer [GET /activeTransfer]
 
 Get the list of all senders/receivers in the host.
 
