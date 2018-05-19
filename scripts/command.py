@@ -31,7 +31,7 @@ def get_res(res):
     err = None
     try:
         json_res_str = res.read()
-        json_res = json.loads(json_res_str)
+        json_res = json.loads(json_res_str.decode("utf-8"))
     except ValueError:
         err = "Cannot parse response: {}".format(json_res_str)
 
@@ -87,9 +87,7 @@ def get_progress(host, port, transfer_id):
     if err:
         return err
 
-    print("Type: {}".format(res_json["type"]))
-    print("Progress: {}".format(res_json["progress"]))
-    return None
+    return None, res_json
 
 
 def update_rate(host, port, transfer_id, rate):
@@ -136,9 +134,7 @@ def active_transfer(host, port):
     if err:
         return err
 
-    print("Senders: {}".format(res_json["senders"]))
-    print("Receivers: {}".format(res_json["receivers"]))
-    return None
+    return None, res_json
 
 
 if __name__ == "__main__":
@@ -162,7 +158,9 @@ if __name__ == "__main__":
         error = receive(server_host, server_port, int(sys.argv[2]), int(sys.argv[3]))
 
     if sys.argv[1] == "progress":
-        error = get_progress(server_host, server_port, int(sys.argv[2]))
+        error, res_json = get_progress(server_host, server_port, int(sys.argv[2]))
+        print("Type: {}".format(res_json["type"]))
+        print("Progress: {}".format(res_json["progress"]))
 
     if sys.argv[1] == "update":
         error = update_rate(server_host, server_port, int(sys.argv[2]), int(sys.argv[3]))
@@ -171,7 +169,9 @@ if __name__ == "__main__":
         error = terminate(server_host, server_port, int(sys.argv[2]))
 
     if sys.argv[1] == "transfer":
-        error = active_transfer(server_host, server_port)
+        error, res_json = active_transfer(server_host, server_port)
+        print("Senders: {}".format(res_json["senders"]))
+        print("Receivers: {}".format(res_json["receivers"]))
 
     if error:
         print(error)
