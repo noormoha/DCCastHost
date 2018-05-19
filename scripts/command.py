@@ -138,35 +138,37 @@ def active_transfer(host, port):
 
 
 if __name__ == "__main__":
-    server_host = "127.0.0.1"
+    server_host = None
     server_port = 9080
 
-    if len(sys.argv) <= 1:
+    if len(sys.argv) <= 2:
         print("Usage:")
-        print("send [transfer id] [destination ip] [source and destination port] [rate]")
-        print("receive [transfer_id] [source and destination port]")
-        print("progress [transfer_id]")
-        print("update [transfer_id] [rate]")
-        print("terminate [transfer_id]")
-        print("transfer")
+        print("send [node ip] [transfer id] [destination ip] [source and destination port] [rate]")
+        print("receive [node ip] [transfer_id] [source and destination port]")
+        print("progress [node ip] [transfer_id]")
+        print("update [node ip] [transfer_id] [rate]")
+        print("terminate [node ip] [transfer_id]")
+        print("transfer [node ip]")
         exit(0)
     error = "Invalid Command"
+
+    server_host = sys.argv[2]
     if sys.argv[1] == "send":
-        error = send(server_host, server_port, int(sys.argv[2]), sys.argv[3], int(sys.argv[4]), int(sys.argv[5]))
+        error = send(server_host, server_port, int(sys.argv[3]), sys.argv[4], int(sys.argv[5]), int(sys.argv[6]))
 
     if sys.argv[1] == "receive":
-        error = receive(server_host, server_port, int(sys.argv[2]), int(sys.argv[3]))
+        error = receive(server_host, server_port, int(sys.argv[3]), int(sys.argv[4]))
 
     if sys.argv[1] == "progress":
-        error, res_json = get_progress(server_host, server_port, int(sys.argv[2]))
+        error, res_json = get_progress(server_host, server_port, int(sys.argv[3]))
         print("Type: {}".format(res_json["type"]))
         print("Progress: {}".format(res_json["progress"]))
 
     if sys.argv[1] == "update":
-        error = update_rate(server_host, server_port, int(sys.argv[2]), int(sys.argv[3]))
+        error = update_rate(server_host, server_port, int(sys.argv[3]), int(sys.argv[4]))
 
     if sys.argv[1] == "terminate":
-        error = terminate(server_host, server_port, int(sys.argv[2]))
+        error = terminate(server_host, server_port, int(sys.argv[3]))
 
     if sys.argv[1] == "transfer":
         error, res_json = active_transfer(server_host, server_port)
