@@ -13,7 +13,7 @@ A send request will start a NORM sender and send data from its own IP address an
     + transferId: `0` (number) - An unique integer identifier of transfer seesion with a range [0, 5000].
     + dst: `127.0.0.1` (string) - The desination IP address as a string.
     + port: `1000` (number) - An integer with a range [1000, 9999]. The port number that will be used as both source port and destination port.
-    + rate: `500` (number) - An integer with a range[1, 2^32] that indicate how many bytes the sender should send in 1 second.
+    + rate: `500` (number) - An integer with a range[1, max(double)] that indicate how many *bits* the sender should send in 1 second.
 
 + Response 200 (application/json)
     
@@ -71,8 +71,8 @@ An update rate request will update rate limit of the sender with id **transferId
 
 + Parameters 
 
-    + transferId: `0` (number) - An unique integer identifier of transfer seesion with a range [0, 5000].
-    + rate: `500` (number) - An integer with a range[1, 2^32] that indicate how many bytes the sender should send in 1 second.
+    + transferId: `0` (number) - An unique integer identifier of transfer session with a range [0, 5000].
+    + rate: `500` (number) - An integer with a range[1, max(double)] that indicate how many *bits* the sender should send in 1 second.
 
 + Response 200 (application/json)
     
@@ -96,11 +96,11 @@ An update rate request will update rate limit of the sender with id **transferId
 
 ### Check Progress [GET /progress/{transferId}]
 
-Return how many bytes a sender/receiver has proccessed.
+Return how many bytes a sender/receiver has processed.
 
 + Parameters
 
-    + transferId: `0` (number) - An unique integer identifier of transfer seesion with a range [0, 5000].
+    + transferId: `0` (number) - An unique integer identifier of transfer session with a range [0, 5000].
 
 + Response 200 (application/json)
 
@@ -131,7 +131,7 @@ Force a sender/receiver to stop.
 
 + Parameters
 
-     + transferId: `0` (number) - An unique integer identifier of transfer seesion with a range [0, 5000].
+     + transferId: `0` (number) - An unique integer identifier of transfer session with a range [0, 5000].
 
 + Response 200 (application/json)
     
@@ -151,9 +151,9 @@ Force a sender/receiver to stop.
     
             {"error": "Reason of the error"}
             
-## Clean [/cleanall]
+## Clean [/cleanAll]
 
-### Clean Any Transmission [POST /cleanall]
+### Clean Any Transmission [POST /cleanAll]
 
 Force all senders/receivers to stop.
 
