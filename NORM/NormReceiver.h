@@ -38,7 +38,7 @@ public:
     ~NormReceiver();
 
     // Configs
-    static const int NORM_RECEIVER_BUFFER = 500 * 1024 * 1024;
+    static const int NORM_RECEIVER_BUFFER = 20 * 1024 * 1024;
 
 
 
