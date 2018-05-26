@@ -6,7 +6,6 @@
 #define DCCASTHOST_NORMMANAGER_H
 
 
-#include <zconf.h>
 #include <unordered_map>
 #include <mutex>
 #include <shared_mutex>
