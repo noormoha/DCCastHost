@@ -3,7 +3,7 @@
 //
 
 #include <cstring>
-#include <zconf.h>
+#include <unistd.h>
 #include "../NORM/NormReceiver.h"
 #include "../NORM/NormSender.h"
 

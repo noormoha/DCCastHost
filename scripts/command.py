@@ -35,6 +35,8 @@ def get_res(res):
     except ValueError:
         err = "Cannot parse response: {}".format(json_res_str)
 
+    if json_res:
+        err = json_res.get("error", None)
     return json_res, err
 
 
@@ -84,10 +86,11 @@ def get_progress(host, port, transfer_id):
         return err
 
     res_json, err = get_res(res)
-    if err:
-        return err
 
-    return None, res_json
+    if err:
+        return err, None
+
+    return res_json.get("error", None), res_json
 
 
 def update_rate(host, port, transfer_id, rate):
@@ -137,6 +140,20 @@ def active_transfer(host, port):
     return None, res_json
 
 
+def clean_all(host, port):
+    conn, err = establish_connect(host, port)
+    if err:
+        return err
+
+    url = "/cleanAll"
+
+    res, err = send_request(conn, "POST", url)
+    if err:
+        return err
+
+    return check_res_error(res)
+
+
 if __name__ == "__main__":
     server_host = None
     server_port = 9080
@@ -149,6 +166,7 @@ if __name__ == "__main__":
         print("update [node ip] [transfer_id] [rate]")
         print("terminate [node ip] [transfer_id]")
         print("transfer [node ip]")
+        print("clean [node ip]")
         exit(0)
     error = "Invalid Command"
 
@@ -161,8 +179,9 @@ if __name__ == "__main__":
 
     if sys.argv[1] == "progress":
         error, res_json = get_progress(server_host, server_port, int(sys.argv[3]))
-        print("Type: {}".format(res_json["type"]))
-        print("Progress: {}".format(res_json["progress"]))
+        if not error:
+            print("Type: {}".format(res_json["type"]))
+            print("Progress: {}".format(res_json["progress"]))
 
     if sys.argv[1] == "update":
         error = update_rate(server_host, server_port, int(sys.argv[3]), int(sys.argv[4]))
@@ -172,8 +191,11 @@ if __name__ == "__main__":
 
     if sys.argv[1] == "transfer":
         error, res_json = active_transfer(server_host, server_port)
-        print("Senders: {}".format(res_json["senders"]))
-        print("Receivers: {}".format(res_json["receivers"]))
+        if not error:
+            print("Senders: {}".format(res_json["senders"]))
+            print("Receivers: {}".format(res_json["receivers"]))
+    if sys.argv[1] == "clean":
+        error = clean_all(server_host, server_port)
 
     if error:
         print(error)

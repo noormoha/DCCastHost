@@ -2,8 +2,8 @@
 // Created by tang on 4/10/18.
 //
 
-#include <zconf.h>
 #include <iostream>
+#include <unistd.h>
 #include "../NORM/NormManager.h"
 
 using namespace std;

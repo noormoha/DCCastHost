@@ -2,6 +2,7 @@
 // Created by tang on 4/5/18.
 //
 
+#include <unistd.h>
 #include "../NORM/NormInstance.h"
 
 using namespace DCCast;

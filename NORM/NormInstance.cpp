@@ -182,6 +182,13 @@ void NormInstance::terminate() {
 void NormInstance::terminate_receiver() {
     NormReceiver *receiver = concrete.receiver.receiver;
 
+    DC_STATUS status = receiver->get_status();
+    if (status == FINISHING || status == TERMINATED || status == ERROR) {
+        // Instance is not at running state
+        // Do not need to send a terminate command
+        return;
+    }
+
     DCCommand command = {};
     command.type = TERMINATE;
     command.id = receiver->get_id();
@@ -204,6 +211,13 @@ void NormInstance::terminate_receiver() {
 
 void NormInstance::terminate_sender() {
     NormSender *sender = concrete.sender.sender;
+
+    DC_STATUS status = sender->get_status();
+    if (status == FINISHING || status == TERMINATED || status == ERROR) {
+        // Instance is not at running state
+        // Do not need to send a terminate command
+        return;
+    }
 
     DCCommand command = {};
     command.type = TERMINATE;

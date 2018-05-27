@@ -24,6 +24,7 @@ public:
     uint64_t get_progress(unsigned int id);
     void terminate(unsigned int id);
     void active_transfers(std::vector<unsigned int> &senders, std::vector<unsigned int> &receivers);
+    void clean_all();
 
     std::string get_type(unsigned int id);
 
@@ -34,7 +35,7 @@ public:
 
 private:
     std::shared_timed_mutex lock;
-    std::unordered_map<int, NormInstance*> instances;
+    std::unordered_map<unsigned int, NormInstance*> instances;
 
     NormInstance* get_norm_instance(unsigned int id);
     NormInstance* get_create_norm_instance(unsigned int id);

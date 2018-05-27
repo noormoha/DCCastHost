@@ -3,7 +3,7 @@
 //
 
 #include <cstring>
-#include <zconf.h>
+#include <unistd.h>
 #include "../NORM/NormSender.h"
 
 using namespace DCCast;

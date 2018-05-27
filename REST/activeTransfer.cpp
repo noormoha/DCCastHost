@@ -21,7 +21,7 @@ void DCCastAPI::activeTransfer(const Pistache::Rest::Request& req, Pistache::Htt
     std::vector<unsigned int> receivers, senders;
 
     try {
-        instance.active_transfers(receivers, senders);
+        instance.active_transfers(senders, receivers);
     }
     catch (DCException &e) {
         response["error"] = e.what();

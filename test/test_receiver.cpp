@@ -4,7 +4,7 @@
 
 
 #include <cstring>
-#include <zconf.h>
+#include <unistd.h>
 #include "../NORM/NormReceiver.h"
 
 using namespace DCCast;
