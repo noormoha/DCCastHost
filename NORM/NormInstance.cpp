@@ -20,8 +20,16 @@ void DCCast::NormInstance::init_receiver(unsigned int transferId, unsigned short
     recycle();
 
     this->type = RECEIVER;
-
-    this->concrete.receiver.receiver = new NormReceiver(transferId, port);
+    try {
+        this->concrete.receiver.receiver = new NormReceiver(transferId, port);
+    }
+    catch (DCException &e) {
+        // Cannot create sender
+        // Do cleaning and re-throw exception
+        this->type = NONE;
+        this->concrete.receiver.receiver = nullptr;
+        throw;
+    }
 }
 
 void DCCast::NormInstance::init_sender(unsigned int transferId, std::string dst, unsigned short port, double rate) {
@@ -38,8 +46,17 @@ void DCCast::NormInstance::init_sender(unsigned int transferId, std::string dst,
 
     this->concrete.sender.data = data;
     this->concrete.sender.data_len = NORM_SENDER_DATA_OBJECT_LEN;
-    this->concrete.sender.sender = new NormSender(transferId, dst, port, rate, this->concrete.sender.data,
-                                                  this->concrete.sender.data_len);
+    try {
+        this->concrete.sender.sender = new NormSender(transferId, dst, port, rate, this->concrete.sender.data,
+                                                      this->concrete.sender.data_len);
+    }
+    catch (DCException &e) {
+        // Cannot create sender
+        // Do cleaning and re-throw exception
+        this->type = NONE;
+        this->concrete.sender.sender = nullptr;
+        throw;
+    }
 }
 
 void DCCast::NormInstance::recycle() {
@@ -203,7 +220,6 @@ void NormInstance::terminate_receiver() {
     if (response.id != receiver->get_id() || response.type != TERMINATE) {
         throw std::runtime_error("Inconsistent type/id");
     }
-
     if (!response.success) {
         throw DCException("Command failed");
     }

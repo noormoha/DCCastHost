@@ -21,7 +21,8 @@ namespace DCCast {
 
     typedef enum DC_COMMAND_TYPE {
         TERMINATE,
-        UPDATE_RATE
+        UPDATE_RATE,
+        WAIT_START
     } dc_command_type;
 
     union DCCommandContent {
@@ -37,7 +38,6 @@ namespace DCCast {
     };
 
 union DCResponseContent {
-
 };
 
     struct DCResponse {

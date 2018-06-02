@@ -8,11 +8,7 @@ import sys
 sys.path.insert(0, script_path)
 import command
 
-test_topo = [
-    [0, 1, "10.0.0.1", "10.0.0.2"]
-]
-
-port = 9080
+from test_config import test_topo, port
 
 class TestBasic(unittest.TestCase):
 
@@ -97,9 +93,6 @@ class TestCleanAll(unittest.TestCase):
         err, res_json = command.active_transfer(test_topo[0][3], port)
         self.assertIsNone(err)
         self.assertEqual(len(res_json['receivers']), 0)
-
-
-
 
 
 if __name__ == '__main__':

@@ -91,10 +91,12 @@ void* receiver_loop(void *args) {
             if(command.type == TERMINATE) {
                 running = false;
                 *args_struct->status = FINISHING;
-
-                response.type = TERMINATE;
+                // Terminating response will be send when thread is about to exit
+            }
+            else if(command.type == WAIT_START) {
+                response.type = WAIT_START;
                 response.id = args_struct->id;
-                response.success = true;
+                response.success = *args_struct->status == PROGRESSING;
 
                 args_struct->responses->enqueue(response);
             }
@@ -167,9 +169,15 @@ void* receiver_loop(void *args) {
         }
         //End of the loop
     }
-    *args_struct->status = TERMINATED;
-
     clean(session, instance);
+    // Exit normally
+    *args_struct->status = TERMINATED;
+    DCResponse response = {};
+    response.type = TERMINATE;
+    response.id = args_struct->id;
+    response.success = true;
+
+    args_struct->responses->enqueue(response);
 }
 
 DCCast::NormReceiver::NormReceiver(unsigned int _id, unsigned short port) {
@@ -195,6 +203,24 @@ DCCast::NormReceiver::NormReceiver(unsigned int _id, unsigned short port) {
 
     if (pthread_detach(receiver) != 0) {
         throw std::runtime_error("pthread_detach(): Failed");
+    }
+
+    // enqueue a WAIT_START command. Will get response when main loop start processing command,
+    // which means it finishes initializing
+    DCCommand command = {};
+    command.type = WAIT_START;
+    command.id = id;
+    requests->enqueue(command);
+
+    DCResponse response = {};
+    if (!responses->wait_dequeue_timed(response, std::chrono::seconds(2))) {
+        throw DCException("Timeout when waiting for response");
+    }
+    if (response.id != id || response.type != WAIT_START) {
+        throw std::runtime_error("Inconsistent type/id");
+    }
+    if (!response.success) {
+        throw DCException("Command failed");
     }
 }
 
