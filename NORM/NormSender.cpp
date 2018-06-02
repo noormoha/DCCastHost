@@ -256,9 +256,9 @@ unsigned int NormSender::get_id() {
 }
 
 NormSender::~NormSender() {
-    delete args;
     delete responses;
     delete requests;
+    delete args;
 }
 
 }

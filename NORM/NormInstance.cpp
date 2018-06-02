@@ -54,7 +54,8 @@ void DCCast::NormInstance::init_sender(unsigned int transferId, std::string dst,
         // Cannot create sender
         // Do cleaning and re-throw exception
         this->type = NONE;
-        this->concrete.sender.sender = nullptr;
+        delete this->concrete.sender.data;
+        this->concrete = {};
         throw;
     }
 }
@@ -223,6 +224,8 @@ void NormInstance::terminate_receiver() {
     if (!response.success) {
         throw DCException("Command failed");
     }
+
+    delete(concrete.receiver.receiver);
 }
 
 void NormInstance::terminate_sender() {
@@ -253,6 +256,9 @@ void NormInstance::terminate_sender() {
     if (!response.success) {
         throw DCException("Command failed");
     }
+
+    delete(concrete.sender.sender);
+    delete(concrete.sender.data);
 }
 
 }
