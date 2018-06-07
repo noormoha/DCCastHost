@@ -226,6 +226,8 @@ void NormInstance::terminate_receiver() {
     }
 
     delete(concrete.receiver.receiver);
+
+    type = NONE;
 }
 
 void NormInstance::terminate_sender() {
@@ -259,6 +261,8 @@ void NormInstance::terminate_sender() {
 
     delete(concrete.sender.sender);
     delete(concrete.sender.data);
+
+    type = NONE;
 }
 
 }
