@@ -70,9 +70,6 @@ void* receiver_loop(void *args) {
 
     *args_struct->status = PROGRESSING;
 
-    // Total byte sent until last completely received object
-    uint64_t last_obj_sent = 0;
-
     // Loop begin
     bool running = true;
     while (running) {
@@ -130,25 +127,7 @@ void* receiver_loop(void *args) {
             std::cout << type_name_map[event.type] << std::endl;
 #endif
 
-            if (event.type == NORM_RX_OBJECT_UPDATED) {
-                NormObjectHandle obj = event.object;
-                if (obj == NORM_OBJECT_INVALID) {
-                    log_error(args_struct->id, "Receive empty object.");
-                    *args_struct->status = ERROR;
-                    pthread_exit(nullptr);
-                }
-
-                long long pending = NormObjectGetBytesPending(obj);
-                long long size = NormObjectGetSize(obj);
-                if (pending < 0 || size < 0) {
-                    log_error(args_struct->id, "Negative length object");
-                    *args_struct->status = ERROR;
-                    pthread_exit(nullptr);
-                }
-
-                *args_struct->progress = last_obj_sent + size - pending;
-            }
-            else if (event.type == NORM_RX_OBJECT_COMPLETED) {
+            if (event.type == NORM_RX_OBJECT_COMPLETED) {
                 NormObjectHandle obj = event.object;
                 if (obj == NORM_OBJECT_INVALID) {
                     log_error(args_struct->id, "Receive empty object. What's happening?");
@@ -163,8 +142,7 @@ void* receiver_loop(void *args) {
                     pthread_exit(nullptr);
                 }
 
-                last_obj_sent += size;
-                *args_struct->progress = last_obj_sent;
+                *args_struct->progress += size;
             }
         }
         //End of the loop
