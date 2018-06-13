@@ -28,6 +28,11 @@ add_executable(DCCastHost
         REST/activeTransfer.cpp
         REST/terminate.cpp REST/API.h REST/updateRate.cpp REST/receive.cpp REST/send.cpp)
 
+add_executable(PistacheTest
+        test/pistache_test.cpp)
+
+target_link_libraries(PistacheTest pistache pthread)
+
 target_link_libraries(DCCastHost pistache pthread NormManager)
 
 

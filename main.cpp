@@ -13,7 +13,7 @@ int main() {
     Address address = Address("*:9080");
     Http::Endpoint server(address);
 
-    auto opt = Http::Endpoint::options().threads(1);
+    auto opt = Http::Endpoint::options().threads(1).flags(Tcp::Options::ReuseAddr);
     server.init(opt);
 
     Rest::Router router;
