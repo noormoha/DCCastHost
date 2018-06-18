@@ -5,7 +5,6 @@
 #ifndef DCCASTHOST_NORMINSTANCE_H
 #define DCCASTHOST_NORMINSTANCE_H
 
-#include <zconf.h>
 #include <mutex>
 #include "NormDefinition.h"
 #include "NormSender.h"

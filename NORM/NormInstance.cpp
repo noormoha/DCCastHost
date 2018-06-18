@@ -20,8 +20,16 @@ void DCCast::NormInstance::init_receiver(unsigned int transferId, unsigned short
     recycle();
 
     this->type = RECEIVER;
-
-    this->concrete.receiver.receiver = new NormReceiver(transferId, port);
+    try {
+        this->concrete.receiver.receiver = new NormReceiver(transferId, port);
+    }
+    catch (DCException &e) {
+        // Cannot create sender
+        // Do cleaning and re-throw exception
+        this->type = NONE;
+        this->concrete.receiver.receiver = nullptr;
+        throw;
+    }
 }
 
 void DCCast::NormInstance::init_sender(unsigned int transferId, std::string dst, unsigned short port, double rate) {
@@ -38,8 +46,18 @@ void DCCast::NormInstance::init_sender(unsigned int transferId, std::string dst,
 
     this->concrete.sender.data = data;
     this->concrete.sender.data_len = NORM_SENDER_DATA_OBJECT_LEN;
-    this->concrete.sender.sender = new NormSender(transferId, dst, port, rate, this->concrete.sender.data,
-                                                  this->concrete.sender.data_len);
+    try {
+        this->concrete.sender.sender = new NormSender(transferId, dst, port, rate, this->concrete.sender.data,
+                                                      this->concrete.sender.data_len);
+    }
+    catch (DCException &e) {
+        // Cannot create sender
+        // Do cleaning and re-throw exception
+        this->type = NONE;
+        delete this->concrete.sender.data;
+        this->concrete = {};
+        throw;
+    }
 }
 
 void DCCast::NormInstance::recycle() {
@@ -182,6 +200,13 @@ void NormInstance::terminate() {
 void NormInstance::terminate_receiver() {
     NormReceiver *receiver = concrete.receiver.receiver;
 
+    DC_STATUS status = receiver->get_status();
+    if (status == FINISHING || status == TERMINATED || status == ERROR) {
+        // Instance is not at running state
+        // Do not need to send a terminate command
+        return;
+    }
+
     DCCommand command = {};
     command.type = TERMINATE;
     command.id = receiver->get_id();
@@ -196,14 +221,24 @@ void NormInstance::terminate_receiver() {
     if (response.id != receiver->get_id() || response.type != TERMINATE) {
         throw std::runtime_error("Inconsistent type/id");
     }
-
     if (!response.success) {
         throw DCException("Command failed");
     }
+
+    delete(concrete.receiver.receiver);
+
+    type = NONE;
 }
 
 void NormInstance::terminate_sender() {
     NormSender *sender = concrete.sender.sender;
+
+    DC_STATUS status = sender->get_status();
+    if (status == FINISHING || status == TERMINATED || status == ERROR) {
+        // Instance is not at running state
+        // Do not need to send a terminate command
+        return;
+    }
 
     DCCommand command = {};
     command.type = TERMINATE;
@@ -223,6 +258,11 @@ void NormInstance::terminate_sender() {
     if (!response.success) {
         throw DCException("Command failed");
     }
+
+    delete(concrete.sender.sender);
+    delete(concrete.sender.data);
+
+    type = NONE;
 }
 
 }

@@ -120,10 +120,12 @@ void* sender_loop(void *args) {
             else if(command.type == TERMINATE) {
                 running = false;
                 *args_struct->status = FINISHING;
-
-                response.type = TERMINATE;
+                //Terminate response will be sent when the thread is about to exit
+            }
+            else if(command.type == WAIT_START) {
+                response.type = WAIT_START;
                 response.id = args_struct->id;
-                response.success = true;
+                response.success = *args_struct->status == PROGRESSING;
 
                 args_struct->responses->enqueue(response);
             }
@@ -173,9 +175,18 @@ void* sender_loop(void *args) {
         }
         // End of the loop
     }
-    *args_struct->status = TERMINATED;
 
     clean(session, instance);
+
+    // Exit normally
+    *args_struct->status = TERMINATED;
+
+        DCResponse response = {};
+    response.type = TERMINATE;
+    response.id = args_struct->id;
+    response.success = true;
+
+    args_struct->responses->enqueue(response);
 
 }
 
@@ -212,6 +223,24 @@ DCCast::NormSender::NormSender(unsigned int _id, std::string dst, unsigned short
         // Fatal error that will crash the system
         throw std::runtime_error("pthread_detach(): Failed");
     }
+
+    // enqueue a WAIT_START command. Will get response when main loop start processing command,
+    // which means it finishes initializing
+    DCCommand command = {};
+    command.type = WAIT_START;
+    command.id = id;
+    requests->enqueue(command);
+
+    DCResponse response = {};
+    if (!responses->wait_dequeue_timed(response, std::chrono::seconds(2))) {
+        throw DCException("Timeout when waiting for response");
+    }
+    if (response.id != id || response.type != WAIT_START) {
+        throw std::runtime_error("Inconsistent type/id");
+    }
+    if (!response.success) {
+        throw DCException("Command failed");
+    }
 }
 
 uint64_t NormSender::get_progress() {
@@ -227,9 +256,9 @@ unsigned int NormSender::get_id() {
 }
 
 NormSender::~NormSender() {
-    delete args;
     delete responses;
     delete requests;
+    delete args;
 }
 
 }

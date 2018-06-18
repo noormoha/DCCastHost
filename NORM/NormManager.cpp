@@ -123,5 +123,14 @@ std::string NormManager::get_type(unsigned int id) {
     return dc_instance_type_str(instance->type);
 }
 
+void NormManager::clean_all() {
+    // No new instance shall be created during clean all
+    std::shared_lock<std::shared_timed_mutex> guard(lock);
+    for (auto p : instances) {
+        terminate(p.first);
+    }
+    guard.unlock();
+}
+
 
 }
